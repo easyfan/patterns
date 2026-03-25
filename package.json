@@ -1,0 +1,43 @@
+{
+  "name": "patterns-cc",
+  "version": "1.1.0",
+  "description": "Workflow pattern manager for Claude Code — lists, instantiates, and patches workflow patterns. Includes /patterns command and agent-monitoring pattern template.",
+  "keywords": [
+    "claude-code",
+    "patterns",
+    "workflow",
+    "agent-monitoring",
+    "automation",
+    "templates",
+    "orchestration"
+  ],
+  "author": {
+    "name": "cc-meta-project"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/easyfan/patterns.git"
+  },
+  "homepage": "https://github.com/easyfan/patterns#readme",
+  "bugs": {
+    "url": "https://github.com/easyfan/patterns/issues"
+  },
+  "files": [
+    ".claude-plugin/",
+    "commands/",
+    "patterns/",
+    "SKILL.md",
+    "install.sh",
+    "install.ps1"
+  ],
+  "bin": {
+    "patterns-install": "install.sh"
+  },
+  "scripts": {
+    "postinstall": "echo '\\n  patterns-cc installed!\\n  Run: npx patterns-install\\n  Or copy manually:\\n    cp commands/patterns.md ~/.claude/commands/\\n    cp patterns/agent-monitoring.md ~/.claude/patterns/\\n'"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

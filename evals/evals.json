@@ -1,0 +1,129 @@
+{
+  "skill_name": "patterns",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "/patterns",
+      "expected_output": "列出 ~/.claude/patterns/ 目录下所有可用 pattern，包含名称、简介和修改时间。若为元项目还需检查 pending proposals。",
+      "assertions": [
+        {
+          "text": "输出包含 '📚 可用 Pattern 列表' 标题",
+          "check": "contains('📚 可用 Pattern 列表')"
+        },
+        {
+          "text": "输出包含 'agent-monitoring' pattern 条目（该目录下存在此文件）",
+          "check": "contains('agent-monitoring')"
+        },
+        {
+          "text": "每个条目包含修改时间",
+          "check": "contains('修改:')"
+        }
+      ],
+      "pitfall_ref": null
+    },
+    {
+      "id": 2,
+      "prompt": "/patterns agent-monitoring",
+      "expected_output": "读取 agent-monitoring.md 模板，探测当前项目信息（优先读 CLAUDE.md），填充 Kickoff Prompt 占位符，引导建立工作流，写入 command/agent 文件，最后询问是否执行 /skill-review。",
+      "assertions": [
+        {
+          "text": "读取 ~/.claude/patterns/agent-monitoring.md",
+          "check": "tool_used('Read', path_contains('agent-monitoring'))"
+        },
+        {
+          "text": "输出 '✅ 工作流建立完成' 汇报区块",
+          "check": "contains('✅ 工作流建立完成')"
+        },
+        {
+          "text": "生成的 command/agent 文件 YAML front-matter 包含 generated-from: agent-monitoring",
+          "check": "file_contains('generated-from: agent-monitoring')"
+        },
+        {
+          "text": "Step 7 质量门：询问是否执行 /skill-review",
+          "check": "contains('/skill-review')"
+        }
+      ],
+      "pitfall_ref": null
+    },
+    {
+      "id": 3,
+      "prompt": "/patterns nonexistent-pattern",
+      "expected_output": "输出 '未找到 pattern: nonexistent-pattern'，然后列出可用 pattern 列表后退出。不得报错崩溃。",
+      "assertions": [
+        {
+          "text": "输出 '未找到 pattern' 提示",
+          "check": "contains('未找到 pattern')"
+        },
+        {
+          "text": "退出前展示可用 pattern 列表",
+          "check": "contains('📚 可用 Pattern 列表')"
+        }
+      ],
+      "pitfall_ref": null
+    },
+    {
+      "id": 4,
+      "prompt": "/patterns --patch research-module",
+      "expected_output": "扫描 ~/.claude/commands/ 和 ./.claude/commands/ 下的 research-module.md，检测是否含 'research-review' 关键词，展示修补计划后等待确认，执行后汇总修补结果。若未找到文件则输出提示后退出。",
+      "assertions": [
+        {
+          "text": "输出 '🔍 发现以下已实例化命令' 或 '未找到可修补的命令文件' 其中之一",
+          "check": "contains('🔍 发现') || contains('未找到可修补')"
+        },
+        {
+          "text": "若文件存在且缺失 hook，展示修补计划并等待用户确认",
+          "check": "!file_has_keyword('research-review') => contains('⚠️ 缺失 hook')"
+        }
+      ],
+      "pitfall_ref": null
+    },
+    {
+      "id": 5,
+      "prompt": "/patterns agent-monitoring（在有 CLAUDE.md 的元项目中执行）",
+      "expected_output": "Step 2 优先读取 CLAUDE.md 而非执行 shell 探测。Step 0.5 检查 .claude/user-level-write 文件，若存在则扫描 pending proposals。",
+      "assertions": [
+        {
+          "text": "优先读取 CLAUDE.md 作为项目信息来源",
+          "check": "tool_used('Read', path_contains('CLAUDE.md')) before bash_probe"
+        },
+        {
+          "text": "检查 .claude/user-level-write 文件存在性",
+          "check": "bash_contains('user-level-write')"
+        }
+      ],
+      "pitfall_ref": null
+    },
+    {
+      "id": 6,
+      "prompt": "/patterns code-infra（假设该 pattern 只生成 CLAUDE.md 等基础设施文件，不生成 command/agent 文件）",
+      "expected_output": "Step 7 质量门不触发——仅创建基础设施文件（CLAUDE.md、.gitignore 等）时跳过 /skill-review 询问，直接结束。",
+      "assertions": [
+        {
+          "text": "仅创建基础设施文件时，不询问 /skill-review",
+          "check": "!contains('/skill-review')"
+        },
+        {
+          "text": "输出 '✅ 工作流建立完成' 后直接结束，不追加质量门提示",
+          "check": "ends_with('✅ 工作流建立完成') || !contains('是否对新创建的文件执行')"
+        }
+      ],
+      "pitfall_ref": "安装产物 vs 执行产物混淆：基础设施文件（CLAUDE.md、gitignore）不是 command/agent 产物，不应触发 skill-review 质量门"
+    },
+    {
+      "id": 7,
+      "prompt": "/patterns agent-monitoring（目标文件 .claude/commands/agent-monitoring-workflow.md 已存在）",
+      "expected_output": "Step 5a 检测到文件已存在，向用户展示三选一：(1)覆盖 (2)跳过 (3)查看当前内容后决定。不得静默覆盖。",
+      "assertions": [
+        {
+          "text": "检测到文件已存在时，不静默覆盖",
+          "check": "contains('文件已存在') && (contains('覆盖') || contains('跳过'))"
+        },
+        {
+          "text": "等待用户选择后才继续",
+          "check": "!tool_used('Write') before user_response"
+        }
+      ],
+      "pitfall_ref": null
+    }
+  ]
+}

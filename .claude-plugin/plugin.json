@@ -1,0 +1,19 @@
+{
+  "name": "patterns",
+  "version": "1.1.0",
+  "description": "Workflow pattern manager for Claude Code — lists, instantiates, and patches workflow patterns. Ships /patterns command + agent-monitoring template.",
+  "author": {
+    "name": "cc-meta-project"
+  },
+  "homepage": "https://github.com/easyfan/patterns",
+  "repository": "https://github.com/easyfan/patterns",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "patterns",
+    "workflow",
+    "agent-monitoring",
+    "automation",
+    "templates"
+  ]
+}
