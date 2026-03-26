@@ -26,15 +26,20 @@ Workflow pattern manager for Claude Code — lists, instantiates, and patches wo
 
 ```
 /plugin marketplace add easyfan/patterns
+/plugin install patterns@patterns
 ```
 
-### Option B — npx
+> **Note**: `/plugin` is a Claude Code REPL built-in command and cannot be invoked via `claude -p` (returns `Unknown skill: plugin`). Automated test pipelines (skill-test Stage 5) do not cover this install path — run it manually in a Claude Code session.
+
+<!--
+### Option B — npx (not yet published)
 
 ```bash
 npx patterns-cc
 ```
+-->
 
-### Option C — install script
+### Option B — install script
 
 ```bash
 # macOS / Linux
@@ -53,7 +58,7 @@ cd patterns
 CLAUDE_DIR=/custom ./install.sh   # custom Claude config path
 ```
 
-### Option D — manual
+### Option C — manual
 
 ```bash
 cp commands/patterns.md        ~/.claude/commands/

@@ -25,11 +25,13 @@ UNINSTALL=false
 
 for arg in "$@"; do
   case "$arg" in
-    --dry-run)   DRY_RUN=true ;;
-    --uninstall) UNINSTALL=true ;;
+    --dry-run)    DRY_RUN=true ;;
+    --uninstall)  UNINSTALL=true ;;
+    --target=*)   CLAUDE_DIR="${arg#--target=}" ;;
     --help|-h)
-      echo "Usage: ./install.sh [--dry-run] [--uninstall]"
-      echo "  CLAUDE_DIR=/path ./install.sh   # custom Claude config dir"
+      echo "Usage: ./install.sh [--dry-run] [--uninstall] [--target=<path>]"
+      echo "  CLAUDE_DIR=/path ./install.sh   # custom Claude config dir (env var)"
+      echo "  ./install.sh --target=/path     # custom Claude config dir (flag)"
       exit 0 ;;
   esac
 done
@@ -41,10 +43,10 @@ skip()  { printf "  \033[2m– %s (up to date)\033[0m\n" "$*"; }
 warn()  { printf "  \033[33m! %s\033[0m\n" "$*"; }
 run()   { $DRY_RUN || "$@"; }
 
-# ── Files to install: src relative to SCRIPT_DIR → dst relative to CLAUDE_DIR
-declare -A FILES=(
-  ["commands/patterns.md"]="commands/patterns.md"
-  ["patterns/agent-monitoring.md"]="patterns/agent-monitoring.md"
+# ── Files to install: "src_rel|dst_rel" pairs (bash 3.2 compatible)
+FILES=(
+  "commands/patterns.md|commands/patterns.md"
+  "patterns/agent-monitoring.md|patterns/agent-monitoring.md"
 )
 
 # ── Header ────────────────────────────────────────────────────────────────────
@@ -63,8 +65,9 @@ fi
 # ── Uninstall ─────────────────────────────────────────────────────────────────
 if $UNINSTALL; then
   echo "  Uninstalling..."
-  for rel_dst in "${!FILES[@]}"; do
-    dst="$CLAUDE_DIR/${FILES[$rel_dst]}"
+  for pair in "${FILES[@]}"; do
+    rel_dst="${pair#*|}"
+    dst="$CLAUDE_DIR/$rel_dst"
     if [ -f "$dst" ]; then
       run rm "$dst"
       ok "Removed $dst"
@@ -81,9 +84,11 @@ fi
 # ── Install ───────────────────────────────────────────────────────────────────
 changed=0
 
-for rel_src in "${!FILES[@]}"; do
+for pair in "${FILES[@]}"; do
+  rel_src="${pair%%|*}"
+  rel_dst="${pair#*|}"
   src="$SCRIPT_DIR/$rel_src"
-  dst="$CLAUDE_DIR/${FILES[$rel_src]}"
+  dst="$CLAUDE_DIR/$rel_dst"
   dst_dir="$(dirname "$dst")"
 
   [ -d "$dst_dir" ] || run mkdir -p "$dst_dir"

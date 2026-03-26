@@ -2,6 +2,8 @@
   "name": "patterns",
   "version": "1.1.0",
   "description": "Workflow pattern manager for Claude Code — lists, instantiates, and patches workflow patterns. Ships /patterns command + agent-monitoring template.",
+  "install": "bash install.sh",
+  "commands": ["patterns"],
   "author": {
     "name": "cc-meta-project"
   },

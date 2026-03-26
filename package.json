@@ -32,10 +32,10 @@
     "install.ps1"
   ],
   "bin": {
-    "patterns-install": "install.sh"
+    "patterns-cc": "install.sh"
   },
   "scripts": {
-    "postinstall": "echo '\\n  patterns-cc installed!\\n  Run: npx patterns-install\\n  Or copy manually:\\n    cp commands/patterns.md ~/.claude/commands/\\n    cp patterns/agent-monitoring.md ~/.claude/patterns/\\n'"
+    "postinstall": "echo '\\n  patterns-cc installed!\\n  Run: npx patterns-cc\\n  Or copy manually:\\n    cp commands/patterns.md ~/.claude/commands/\\n    cp patterns/agent-monitoring.md ~/.claude/patterns/\\n'"
   },
   "engines": {
     "node": ">=18"
