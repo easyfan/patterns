@@ -21,7 +21,7 @@ metadata:
 /plugin marketplace add easyfan/patterns
 
 # 方式二：npx
-npx patterns-cc
+npx patterns
 
 # 方式三：克隆后运行安装脚本
 ./install.sh              # macOS / Linux

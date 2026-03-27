@@ -1,5 +1,5 @@
 {
-  "name": "patterns-cc",
+  "name": "patterns",
   "version": "1.1.0",
   "description": "Workflow pattern manager for Claude Code — lists, instantiates, and patches workflow patterns. Includes /patterns command and agent-monitoring pattern template.",
   "keywords": [
@@ -32,10 +32,10 @@
     "install.ps1"
   ],
   "bin": {
-    "patterns-cc": "install.sh"
+    "patterns": "install.sh"
   },
   "scripts": {
-    "postinstall": "echo '\\n  patterns-cc installed!\\n  Run: npx patterns-cc\\n  Or copy manually:\\n    cp commands/patterns.md ~/.claude/commands/\\n    cp patterns/agent-monitoring.md ~/.claude/patterns/\\n'"
+    "postinstall": "echo '\\n  patterns installed!\\n  Run: npx patterns\\n  Or copy manually:\\n    cp commands/patterns.md ~/.claude/commands/\\n    cp patterns/agent-monitoring.md ~/.claude/patterns/\\n'"
   },
   "engines": {
     "node": ">=18"

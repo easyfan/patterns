@@ -35,7 +35,7 @@ Workflow pattern manager for Claude Code — lists, instantiates, and patches wo
 ### Option B — npx (not yet published)
 
 ```bash
-npx patterns-cc
+npx patterns
 ```
 -->
 
