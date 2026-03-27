@@ -16,7 +16,7 @@ Workflow pattern manager for Claude Code — lists, instantiates, and patches wo
 
 **Instantiate mode** (`/patterns <name>`): Loads the pattern template, auto-detects project info (from `CLAUDE.md` if available, falling back to shell probes), pre-fills the kickoff prompt, then creates the corresponding `.claude/commands/` and `.claude/agents/` files. All generated files include `generated-from: <pattern_name>` in their YAML front-matter for traceability. If a target file already exists, presents a three-way choice (overwrite / skip / view then decide) — never silently overwrites. Ends with an optional `/skill-review` quality gate, triggered only when command or agent files were written.
 
-**Patch mode** (`/patterns --patch`): Scans existing instantiated commands for missing hook steps using exact title-line matching (e.g., checks for `#### 最终步骤：质量门` rather than bare keyword search to avoid false positives from comments). Detects, previews a patch plan, waits for confirmation, then appends the missing steps. Reports a positive "all hooks complete" confirmation when nothing needs patching.
+**Patch mode** (`/patterns --patch`): Scans existing instantiated commands for missing hook steps using exact title-line matching (e.g., checks for a specific section header rather than bare keyword search to avoid false positives from comments). Detects, previews a patch plan, waits for confirmation, then appends the missing steps. Reports a positive "all hooks complete" confirmation when nothing needs patching.
 
 ---
 
@@ -153,26 +153,26 @@ The full loop from pattern instantiation to reviewed, production-ready command t
 
 ### Evals
 
-`evals/evals.json` 包含 7 个测试用例，覆盖列表、实例化、--patch 三种模式的主要分支：
+`evals/evals.json` contains 7 test cases covering the list, instantiate, and `--patch` modes:
 
-| ID | 场景 | 验证重点 |
-|----|------|---------|
-| 1 | `/patterns`（无参数列表）| 输出所有可用 pattern 目录和描述，底部含 `--patch` 提示 |
-| 2 | `/patterns agent-monitoring`（实例化）| 读取模板，自动探测项目信息，生成 `.claude/` 文件 |
-| 3 | `/patterns nonexistent-xyz`（目标不存在）| 输出"未找到"错误，列出可用 pattern 名称 |
-| 4 | `/patterns --patch research-module`（单命令补丁）| 检测缺失 hook 步骤，预览补丁计划，等待确认后追加 |
-| 5 | 元项目上下文（`.claude/user-level-write` 存在）| 列表模式额外展示 pending proposals |
-| 6 | 仅基础设施项目（无 skill-review 安装）| 实例化流程中跳过 `/skill-review` 质量门，不报错 |
-| 7 | 目标文件已存在冲突 | 触发三选项（覆盖/跳过/查看后决定），不静默覆盖 |
+| ID | Scenario | What is verified |
+|----|----------|-----------------|
+| 1 | `/patterns` (list, no args) | Outputs all available pattern names and descriptions; `--patch` hint shown at bottom |
+| 2 | `/patterns agent-monitoring` (instantiate) | Reads template, auto-detects project info, generates `.claude/` files |
+| 3 | `/patterns nonexistent-xyz` (target not found) | Outputs "not found" error and lists available pattern names |
+| 4 | `/patterns --patch research-module` (single-command patch) | Detects missing hook steps, previews patch plan, waits for confirmation before appending |
+| 5 | Meta-project context (`.claude/user-level-write` present) | List mode also surfaces pending proposals |
+| 6 | Infrastructure-only project (no skill-review installed) | Instantiate flow skips the `/skill-review` quality gate without error |
+| 7 | Target file already exists (conflict) | Triggers three-way prompt (overwrite / skip / view then decide); never silently overwrites |
 
-手动测试（在 Claude Code 会话中）：
+Manual testing (in a Claude Code session):
 ```bash
-/patterns                       # 对应 eval 1
-/patterns agent-monitoring      # 对应 eval 2
-/patterns --patch               # 对应 eval 4（扫描所有命令）
+/patterns                       # eval 1
+/patterns agent-monitoring      # eval 2
+/patterns --patch               # eval 4 — scan all commands
 ```
 
-使用 skill-creator 的 eval loop 批量运行（如已安装）：
+Run all evals using skill-creator's eval loop (if installed):
 ```bash
 python ~/.claude/skills/skill-creator/scripts/run_loop.py \
   --skill-path ~/.claude/commands/patterns.md \
