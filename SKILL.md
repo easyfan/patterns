@@ -12,41 +12,41 @@ metadata:
 
 # patterns
 
-工作流模式引导器 — 列出 pattern 模板、实例化为项目 command/agent 文件，或通过 `--patch` 修补已实例化命令缺失的 hook 步骤。
+Workflow pattern manager — lists pattern templates, instantiates them into project command/agent files, or patches existing instantiated commands with missing hook steps via `--patch`.
 
-## 安装
+## Install
 
 ```bash
-# 方式一：Claude Code 原生插件
+# Option A: Claude Code plugin marketplace
 /plugin marketplace add easyfan/patterns
 
-# 方式二：npx
+# Option B: npx
 npx patterns
 
-# 方式三：克隆后运行安装脚本
+# Option C: clone and run install script
 ./install.sh              # macOS / Linux
 .\install.ps1             # Windows
 
-# 方式四：手动复制
+# Option D: manual copy
 cp commands/patterns.md ~/.claude/commands/
 cp patterns/agent-monitoring.md ~/.claude/patterns/
 ```
 
-## 用法
+## Usage
 
 ```
-/patterns                        # 列出所有可用 pattern
-/patterns <pattern_name>         # 引导建立对应工作流
-/patterns --patch [command_name] # 修补已实例化命令缺失的 hook 步骤
+/patterns                        # list all available patterns
+/patterns <pattern_name>         # instantiate a workflow pattern
+/patterns --patch [command_name] # patch missing hook steps in an instantiated command
 ```
 
-## 内置 Pattern
+## Built-in patterns
 
-| Pattern | 说明 |
-|---------|------|
-| `agent-monitoring` | 运行时 agent 行为监控，在高风险任务后触发 agent-monitor 审查 |
+| Pattern | Description |
+|---------|-------------|
+| `agent-monitoring` | Runtime agent behavior monitoring — triggers agent-monitor review after high-risk tasks |
 
-## 依赖
+## Requirements
 
 - Claude Code CLI
-- `find`、`stat`（系统自带）
+- `find`, `stat` (system)
