@@ -5,37 +5,17 @@
   "owner": {
     "name": "cc-meta-project"
   },
-  "metadata": {
-    "description": "Lists, instantiates, and patches workflow patterns. Ships with a /patterns command that auto-detects project context, fills kickoff prompts, and creates command/agent files from templates. Includes the agent-monitoring pattern for runtime agent behavior auditing."
-  },
   "plugins": [
     {
       "name": "patterns",
-      "source": "./",
       "description": "1 command (/patterns) + 1 pattern template (agent-monitoring). Supports list / instantiate / --patch modes. Auto-fills kickoff prompts from CLAUDE.md or shell probes. Generated files include generated-from traceability field.",
-      "version": "1.1.0",
-      "author": {
-        "name": "cc-meta-project"
-      },
-      "homepage": "https://github.com/easyfan/patterns",
-      "repository": "https://github.com/easyfan/patterns",
-      "license": "MIT",
-      "keywords": [
-        "patterns",
-        "workflow",
-        "agent-monitoring",
-        "templates",
-        "orchestration"
-      ],
       "category": "workflow",
-      "tags": [
-        "patterns",
-        "workflow",
-        "automation",
-        "agents",
-        "monitoring"
-      ],
-      "strict": false
+      "source": {
+        "source": "url",
+        "url": "https://github.com/easyfan/patterns.git",
+        "sha": "29557bdfdd4718206b014e8bb65c2ef402d40670"
+      },
+      "homepage": "https://github.com/easyfan/patterns"
     }
   ]
 }
