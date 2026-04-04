@@ -8,6 +8,7 @@
   "plugins": [
     {
       "name": "patterns",
+      "version": "1.1.0",
       "description": "1 command (/patterns) + 1 pattern template (agent-monitoring). Supports list / instantiate / --patch modes. Auto-fills kickoff prompts from CLAUDE.md or shell probes. Generated files include generated-from traceability field.",
       "category": "workflow",
       "source": {

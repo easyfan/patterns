@@ -6,7 +6,7 @@ license: MIT
 metadata:
   version: "1.1.0"
   author: cc-meta-project
-  platforms: claude-code
+  platforms: [claude-code]
   requires: "commands/patterns.md"
 ---
 

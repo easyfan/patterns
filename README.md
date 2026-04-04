@@ -32,7 +32,7 @@ Workflow pattern manager for Claude Code — lists, instantiates, and patches wo
 > ⚠️ **Not verified by automated tests**: `/plugin` is a Claude Code REPL built-in and cannot be invoked via `claude -p`. Run manually in a Claude Code session; not covered by skill-test pipeline (looper Stage 5).
 
 <!--
-### Option B — npx (not yet published)
+#### npx (not yet published)
 
 ```bash
 npx patterns
@@ -159,15 +159,15 @@ The full loop from pattern instantiation to reviewed, production-ready command t
 
 `evals/evals.json` contains 7 test cases covering the list, instantiate, and `--patch` modes:
 
-| ID | Scenario | What is verified |
-|----|----------|-----------------|
-| 1 | `/patterns` (list, no args) | Outputs all available pattern names and descriptions; `--patch` hint shown at bottom |
-| 2 | `/patterns agent-monitoring` (instantiate) | Reads template, auto-detects project info, generates `.claude/` files |
-| 3 | `/patterns nonexistent-xyz` (target not found) | Outputs "not found" error and lists available pattern names |
-| 4 | `/patterns --patch research-module` (single-command patch) | Detects missing hook steps, previews patch plan, waits for confirmation before appending |
-| 5 | Meta-project context (`.claude/user-level-write` present) | List mode also surfaces pending proposals |
-| 6 | Infrastructure-only project (no skill-review installed) | Instantiate flow skips the `/skill-review` quality gate without error |
-| 7 | Target file already exists (conflict) | Triggers three-way prompt (overwrite / skip / view then decide); never silently overwrites |
+| ID | Prompt | What is verified |
+|----|--------|-----------------|
+| 1 | `/patterns` | Lists all available patterns with names and modification dates; `--patch` hint shown at bottom |
+| 2 | `/patterns` | Outputs usage hint (`/patterns <name>` or `--patch`); listing mode does not trigger `/skill-review` prompt |
+| 3 | `/patterns nonexistent_pattern_xyz_12345` | Outputs "not found" message and lists available patterns; no crash or traceback |
+| 4 | `/patterns --patch` | Scans for instantiated commands with `generated-from` field; outputs patch scan result or "none found" message |
+| 5 | `/patterns --patch research-module` | Shows scan result for named command: found list or "no patchable commands found" message |
+| 6 | `/patterns` | Lists patterns with `--patch` usage tip at the end |
+| 7 | `/patterns --patch nonexistent_cmd_xyz_99999` | Named `--patch` with unknown command outputs "not found" message or empty scan result; no crash |
 
 Manual testing (in a Claude Code session):
 ```bash

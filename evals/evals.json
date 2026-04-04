@@ -93,16 +93,16 @@
     },
     {
       "id": 7,
-      "prompt": "/patterns --patch",
-      "expected_output": "无参数 --patch 正常运行，输出 patch 扫描相关内容，不崩溃",
+      "prompt": "/patterns --patch nonexistent_cmd_xyz_99999",
+      "expected_output": "指定命令名不存在时，--patch 扫描返回"未找到"提示，不崩溃，不含 Traceback",
       "assertions": [
         {
-          "text": "输出包含 patch 扫描相关内容（如'修补'、'发现'、'命令'、'generated-from'等关键词之一）",
-          "check": "contains('修补') || contains('发现') || contains('generated-from') || contains('命令') || contains('patch')"
+          "text": "输出包含'未找到可修补的命令文件'或'🔍 发现'之一（找到匹配或给出无结果提示）",
+          "check": "contains('未找到可修补') || contains('🔍 发现')"
         },
         {
-          "text": "不崩溃",
-          "check": "!contains('Traceback') && !contains('Error:')"
+          "text": "不崩溃（不含 'Traceback'）",
+          "check": "!contains('Traceback')"
         }
       ]
     }
