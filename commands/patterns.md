@@ -334,9 +334,27 @@ find . -name "DESIGN.md" -o -name "ARCHITECTURE.md" 2>/dev/null | head -10
 将填好的 Kickoff Prompt 作为任务执行——即按照 pattern 中的指引，
 **直接为当前项目创建对应的 command 和 agent 文件**，而不是把 prompt 打印出来让用户复制。
 
+**Step 5-pre：声明待创建文件清单（强制，在任何写操作前执行）**
+
+重新读取 pattern 文件，从以下维度推导出完整文件清单：
+
+1. **Coordinator command**：pattern 是否有 Kickoff Prompt / 调用格式章节 → 通常对应一个 `.claude/commands/<name>.md`
+2. **Subagent**：pattern 的 Agent 表、调用格式中是否提到 `subagent_type` 或具体 agent 文件 → 对应 `.claude/agents/<agent>.md`
+3. **实例化约定**：pattern 是否有"实例化约定"章节明确列出产物文件
+
+将推导结果作为 **FILE_MANIFEST**，向用户输出并锁定：
+
+```
+[文件清单] 本次将创建以下文件：
+  .claude/commands/<command>.md   ← coordinator command
+  .claude/agents/<agent>.md       ← subagent（若有）
+```
+
+**此清单一旦声明不可中途缩减**——后续步骤必须全部创建完毕，不得以"pattern 未明确要求"为由跳过任何已声明文件。
+
 **Step 5a：目标文件存在性检查**
 
-对每个待创建文件，先检查是否已存在：
+对 FILE_MANIFEST 中的每个文件，先检查是否已存在：
 - 不存在 → 继续创建
 - 已存在 → 向用户展示：`文件已存在：<路径>，选择：(1)覆盖 (2)跳过 (3)查看当前内容后决定`，等待用户选择后再继续。不得静默覆盖。若用户选 (3)，Read 文件内容展示后，**再次呈现 (1)/(2) 选项**，等待用户做出明确选择。
 
@@ -358,6 +376,40 @@ find . -name "DESIGN.md" -o -name "ARCHITECTURE.md" 2>/dev/null | head -10
   ---
   ```
   该字段用于 `/skill-review` 溯源，不影响命令执行行为。
+
+**Step 5c：写入后验证 generated-from（强制）**
+
+每个 command/agent 文件写入完成后，立即执行以下验证：
+
+```bash
+grep -q "generated-from:" <文件路径> || echo "MISSING"
+```
+
+若输出 `MISSING`，**必须**立即用 Edit 工具将该字段插入 front-matter 的 `---` 结束行之前：
+
+```
+---
+...已有字段...
+generated-from: <pattern_name>
+---
+```
+
+此步骤不可跳过，不依赖生成时是否"记得写入"。
+
+**Step 5d：产物完整性校验（强制）**
+
+对照 Step 5-pre 声明的 FILE_MANIFEST，逐一验证每个文件是否实际存在：
+
+```bash
+ls <文件路径> 2>/dev/null && echo "OK" || echo "MISSING: <文件路径>"
+```
+
+若有任何文件输出 `MISSING`：
+- **立即创建该文件**，不得跳过或提示用户手动处理
+- 创建完毕后重新执行 Step 5c 对新文件补入 `generated-from`
+
+所有 FILE_MANIFEST 中的文件均存在后，才可进入 Step 6。
+
 - 向用户展示创建了哪些文件
 
 #### Step 6：完成汇报
