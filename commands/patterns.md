@@ -9,7 +9,7 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Grep"]
 /patterns                        # 列出所有可用 pattern
 /patterns <pattern_name>         # 加载指定 pattern，引导建立工作流
 /patterns --patch [command_name] # 修补已实例化命令，追加缺失的 hook 步骤
-                                 # 注意：--patch 仅支持以下命令：research-module、research-review
+                                 # --patch 无参数模式动态扫描所有含 generated-from 字段的已实例化命令
 # 实例化成功后，系统将询问是否对新文件执行 /skill-review 质量审查（可跳过）
 ```
 
@@ -40,31 +40,23 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Grep"]
 /patterns --patch research-review  # 只修补指定命令
 ```
 
-#### 修补目标清单
+#### 修补目标
 
-> 以下是当前完整清单。新增 pattern 时需同步更新本表，否则 `--patch` 无参数模式将遗漏新命令。
-
-| 命令文件名 | 缺失的 hook | 检测标题行 |
-|-----------|------------|-----------|
-| `research-module.md` | 完成后询问是否运行 `/research-review` | `#### 最终步骤：质量门` |
-| `research-review.md` | 🔴严重缺失时建议重新运行 `/research-module` | `#### 最终步骤：研究闭环` |
+`--patch` 无参数模式通过扫描 `generated-from` 字段动态发现所有已实例化命令，无需手动维护清单。每个 pattern 在其文件中声明对应的 hook 标题行（`patch-anchor`），`--patch` 通过读取该字段确定检测目标。
 
 #### 执行步骤
 
 **Step P1：扫描**
 
 ```bash
-find "$HOME/.claude/commands" "$(pwd)/.claude/commands" \
-  \( -name "research-module.md" -o -name "research-review.md" \) \
-  2>/dev/null | sort -u
+grep -rl "generated-from:" "$HOME/.claude/commands/" "$(pwd)/.claude/commands/" 2>/dev/null | sort -u
 ```
 
-若指定了 `command_name`，只保留匹配项。
+若指定了 `command_name`，只保留文件名匹配项。
 
 若扫描结果为空，输出后退出：
 ```
-未找到可修补的命令文件。
-支持修补的命令：research-module、research-review。
+未找到可修补的命令文件（未发现含 generated-from 字段的已实例化命令）。
 请先通过 /patterns <pattern_name> 实例化对应工作流，再执行 --patch。
 ```
 
@@ -77,9 +69,13 @@ find "$HOME/.claude/commands" "$(pwd)/.claude/commands" \
 
 **Step P2：逐文件检测**
 
-对每个文件，用 Grep 检测对应 hook 标题行是否已存在：
-- `research-module.md` → grep `#### 最终步骤：质量门`
-- `research-review.md` → grep `#### 最终步骤：研究闭环`
+对每个文件，读取其 `generated-from` 字段确认来源 pattern，再读取对应 pattern 文件获取 `patch-anchor`（检测标题行），用 Grep 检测该标题行是否已存在：
+
+```bash
+grep -q "<patch-anchor 内容>" <文件路径> && echo "HAS_HOOK" || echo "MISSING_HOOK"
+```
+
+若 pattern 文件中未声明 `patch-anchor`，则跳过该文件并提示：`⚠️ <文件名>：无法确定 hook 检测锚点（pattern 未声明 patch-anchor），已跳过。`
 
 分类：
 - 已含关键词 → 标记 `✅ 已有 hook，跳过`
@@ -290,10 +286,10 @@ find . -name "DESIGN.md" -o -name "ARCHITECTURE.md" 2>/dev/null | head -10
 
 #### Step 3：预填 Kickoff Prompt
 
-从 pattern 文件提取 Kickoff Prompt 模板（两个 ``` 之间的内容），
+从 pattern 文件提取 Kickoff Prompt 模板：优先提取 `## Kickoff Prompt` 章节标题下的第一个代码块；若无该章节，则回落到 `## 调用格式` 章节下的第一个代码块。
 将探测结果自动填入对应占位符 `[...]`，无法确定的保留 `[待填写]`。
 
-若 pattern 文件无 Kickoff Prompt 代码块，输出警告并展示 pattern 全文供手动参考：
+若 pattern 文件无上述章节或代码块，输出警告并展示 pattern 全文供手动参考：
 > "⚠️ 该 pattern 无 Kickoff Prompt 模板，展示完整 pattern 内容供参考，请手动构造任务描述。"
 
 向用户展示预填结果：
@@ -319,13 +315,13 @@ find . -name "DESIGN.md" -o -name "ARCHITECTURE.md" 2>/dev/null | head -10
 
 若所有占位符均已填写（无 `[待填写]` 项），**跳过本步骤，直接进入 Step 5**，无需等待用户确认。
 
-对每个 `[待填写]` 项，逐一简短询问用户（不要一次问所有）：
+对每个 `[待填写]` 项，逐一简短询问用户（不要一次问所有）。每次提问格式为 `[占位符 N/总数M] <问题>`，例如：
 
 ```
-这个项目主要做什么？（一句话，如"订单支付微服务"）
+[占位符 1/2] 这个项目主要做什么？（一句话，如"订单支付微服务"）
 ```
 
-等用户回答后继续下一个，直到所有必填项完成。
+等用户回答后继续下一个，直到所有必填项完成。若用户在单次回答中已覆盖多个待填写项，直接提取并跳过对应问题，无需再次确认。
 
 #### Step 5：执行 Kickoff
 
@@ -336,7 +332,7 @@ find . -name "DESIGN.md" -o -name "ARCHITECTURE.md" 2>/dev/null | head -10
 
 **Step 5-pre：声明待创建文件清单（强制，在任何写操作前执行）**
 
-重新读取 pattern 文件，从以下维度推导出完整文件清单：
+基于 Step 1 已读取的 pattern 文件内容，从以下维度推导出完整文件清单：
 
 1. **Coordinator command**：pattern 是否有 Kickoff Prompt / 调用格式章节 → 通常对应一个 `.claude/commands/<name>.md`
 2. **Subagent**：pattern 的 Agent 表、调用格式中是否提到 `subagent_type` 或具体 agent 文件 → 对应 `.claude/agents/<agent>.md`
@@ -348,6 +344,7 @@ find . -name "DESIGN.md" -o -name "ARCHITECTURE.md" 2>/dev/null | head -10
 [文件清单] 本次将创建以下文件：
   .claude/commands/<command>.md   ← coordinator command
   .claude/agents/<agent>.md       ← subagent（若有）
+（以上清单已锁定，所有文件将强制创建。如需调整，请在此步骤前告知。）
 ```
 
 **此清单一旦声明不可中途缩减**——后续步骤必须全部创建完毕，不得以"pattern 未明确要求"为由跳过任何已声明文件。
@@ -394,6 +391,8 @@ generated-from: <pattern_name>
 ---
 ```
 
+Edit 完成后，**输出**：`[修复] 已补入 generated-from 字段: <文件路径>`
+
 此步骤不可跳过，不依赖生成时是否"记得写入"。
 
 **Step 5d：产物完整性校验（强制）**
@@ -406,7 +405,8 @@ ls <文件路径> 2>/dev/null && echo "OK" || echo "MISSING: <文件路径>"
 
 若有任何文件输出 `MISSING`：
 - **立即创建该文件**，不得跳过或提示用户手动处理
-- 创建完毕后重新执行 Step 5c 对新文件补入 `generated-from`
+- 创建完毕后，**输出**：`[验证修复] 重新创建了缺失文件: <文件路径>`
+- 然后重新执行 Step 5c 对新文件补入 `generated-from`
 
 所有 FILE_MANIFEST 中的文件均存在后，才可进入 Step 6。
 
