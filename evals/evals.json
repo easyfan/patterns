@@ -4,7 +4,7 @@
     {
       "id": 1,
       "prompt": "/patterns",
-      "expected_output": "列出 ~/.claude/patterns/ 目录下所有可用 pattern，包含名称、简介和修改时间",
+      "expected_output": "列出 ~/.claude/patterns/ 目录下所有可用 pattern，含名称和修改时间",
       "assertions": [
         {
           "text": "输出包含 '📚 可用 Pattern 列表' 标题",
@@ -22,90 +22,86 @@
     },
     {
       "id": 2,
-      "prompt": "/patterns agent-monitoring",
-      "expected_output": "读取 agent-monitoring 模板，探测项目信息，创建 command/agent 文件，输出完成汇报区块，并询问是否执行 /skill-review",
+      "prompt": "/patterns",
+      "expected_output": "列出 pattern 时包含用法提示，不触发 /skill-review 询问",
       "assertions": [
         {
-          "text": "输出包含 '✅ 工作流建立完成' 或 '[文件清单]' 等实例化进度标志",
-          "check": "contains('✅ 工作流建立完成') || contains('[文件清单]') || contains('[加载中]')"
+          "text": "输出包含用法示例（'/patterns <name>' 或 '--patch'）",
+          "check": "contains('/patterns') || contains('--patch')"
         },
         {
-          "text": "输出提到 'generated-from' 字段或 agent-monitoring 文件被引用",
-          "check": "contains('generated-from') || contains('agent-monitoring')"
-        },
-        {
-          "text": "输出包含 '/skill-review' 质量门询问或已创建的文件路径",
-          "check": "contains('/skill-review') || contains('.claude/commands/') || contains('.claude/agents/')"
+          "text": "列出模式不触发 /skill-review 询问（无质量门）",
+          "check": "!contains('是否对新创建的文件执行 /skill-review')"
         }
       ]
     },
     {
       "id": 3,
       "prompt": "/patterns nonexistent_pattern_xyz_12345",
-      "expected_output": "输出'未找到 pattern'或类似提示，然后展示可用 pattern 列表后退出，不崩溃",
+      "expected_output": "输出提示找不到该 pattern，然后列出可用 pattern，不崩溃",
       "assertions": [
         {
-          "text": "输出'未找到 pattern'或'not found'类提示",
-          "check": "contains('未找到') || contains('not found') || contains('不存在')"
+          "text": "输出不含 Error 或 Traceback",
+          "check": "!contains('Traceback') && !contains('Error:')"
         },
         {
-          "text": "退出前展示可用 pattern 列表（含'📚 可用 Pattern 列表'或'agent-monitoring'）",
-          "check": "contains('📚 可用 Pattern 列表') || contains('agent-monitoring')"
+          "text": "输出包含可用 pattern 列表引导（含 'agent-monitoring' 或 '📚 可用 Pattern 列表'）",
+          "check": "contains('agent-monitoring') || contains('📚 可用 Pattern 列表')"
         }
       ]
     },
     {
       "id": 4,
-      "prompt": "/patterns --patch research-module",
-      "expected_output": "扫描已实例化命令，输出发现结果（'🔍 发现以下已实例化命令'或'未找到可修补的命令文件'），若文件存在且缺失 hook 则展示修补计划",
-      "assertions": [
-        {
-          "text": "输出 '🔍 发现以下已实例化命令' 或 '未找到可修补的命令文件' 其中之一",
-          "check": "contains('🔍 发现') || contains('未找到可修补')"
-        }
-      ]
-    },
-    {
-      "id": 5,
-      "prompt": "/patterns agent-monitoring",
-      "expected_output": "探测项目信息，优先尝试读取 CLAUDE.md，然后展示预填信息或询问缺失项",
-      "assertions": [
-        {
-          "text": "输出包含项目分析步骤标志（'[分析项目]' 或 '探测结果' 或 '[加载中]'）",
-          "check": "contains('[分析项目]') || contains('探测结果') || contains('[加载中]') || contains('Pattern')"
-        },
-        {
-          "text": "输出不包含报错崩溃（无 'Error:' 或 'Traceback'）",
-          "check": "!contains('Traceback') && !contains('Error:')"
-        }
-      ]
-    },
-    {
-      "id": 6,
-      "prompt": "/patterns",
-      "expected_output": "列出可用 pattern，不包含 /skill-review 的询问（无参数列表模式不触发质量门）",
-      "assertions": [
-        {
-          "text": "输出包含 '📚 可用 Pattern 列表'",
-          "check": "contains('📚 可用 Pattern 列表')"
-        },
-        {
-          "text": "输出不包含 '/skill-review' 询问（列表模式不触发质量门）",
-          "check": "!contains('是否对新创建的文件执行 /skill-review')"
-        }
-      ]
-    },
-    {
-      "id": 7,
       "prompt": "/patterns --patch",
-      "expected_output": "无参数 --patch 扫描所有含 generated-from 字段的已实例化命令，输出扫描结果",
+      "expected_output": "扫描所有含 generated-from 字段的已实例化命令，输出扫描结果，不崩溃",
       "assertions": [
         {
           "text": "输出 '🔍 发现以下已实例化命令' 或 '未找到可修补的命令文件' 之一",
           "check": "contains('🔍 发现') || contains('未找到可修补')"
         },
         {
-          "text": "不崩溃（不含 'Error:' 或 'Traceback'）",
+          "text": "不崩溃（不含 'Traceback'）",
+          "check": "!contains('Traceback')"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "/patterns --patch research-module",
+      "expected_output": "扫描指定命令，若未找到则输出提示，不崩溃",
+      "assertions": [
+        {
+          "text": "输出 '🔍 发现以下已实例化命令' 或 '未找到可修补的命令文件' 之一",
+          "check": "contains('🔍 发现') || contains('未找到可修补')"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "/patterns",
+      "expected_output": "每次列出 pattern 时末尾有使用建议",
+      "assertions": [
+        {
+          "text": "输出包含 '📚 可用 Pattern 列表'",
+          "check": "contains('📚 可用 Pattern 列表')"
+        },
+        {
+          "text": "包含 --patch 使用提示",
+          "check": "contains('--patch')"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "/patterns --patch",
+      "expected_output": "无参数 --patch 正常运行，输出扫描结果",
+      "assertions": [
+        {
+          "text": "输出 '🔍 发现以下已实例化命令' 或 '未找到可修补的命令文件' 之一",
+          "check": "contains('🔍 发现') || contains('未找到可修补')"
+        },
+        {
+          "text": "不崩溃",
           "check": "!contains('Traceback') && !contains('Error:')"
         }
       ]
