@@ -6,10 +6,7 @@
     "name": "cc-meta-project"
   },
   "homepage": "https://github.com/easyfan/patterns",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/easyfan/patterns.git"
-  },
+  "repository": "https://github.com/easyfan/patterns",
   "license": "MIT",
   "keywords": [
     "claude-code",
