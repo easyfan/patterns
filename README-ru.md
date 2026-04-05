@@ -91,12 +91,25 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 ## Установленные файлы
 
+**Вариант A — Установка через plugin** (`/plugin install`):
+```
+~/.claude/
+└── skills/
+    └── patterns/                # skill /patterns:patterns (обнаруживается автоматически)
+        └── SKILL.md
+# Встроенные шаблоны остаются в кеше plugin — доступ через $SKILL_FILE, копирование не нужно
+```
+
+**Вариант B/C — Установочный скрипт / Вручную**:
 ```
 ~/.claude/
 ├── commands/
 │   └── patterns.md              # slash-команда /patterns
-└── patterns/
-    └── agent-monitoring.md      # шаблон мониторинга агентов в реальном времени
+├── patterns/
+│   └── agent-monitoring.md      # шаблон мониторинга агентов в реальном времени
+└── skills/
+    └── patterns/                # skill /patterns:patterns
+        └── SKILL.md
 ```
 
 ---
@@ -112,12 +125,18 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 ## Архитектура
 
 ```
-/patterns (координатор)
+/patterns:patterns (skill, координатор)
 │
-├── Без арг.:  Bash — find ~/.claude/patterns/*.md → список с описаниями + подсказка --patch
+│  Разрешение путей (при каждом запуске):
+│    PLUGIN_ROOT      = dirname(dirname($SKILL_FILE))
+│    PLUGIN_TEMPLATES = $PLUGIN_ROOT/templates/   ← встроенные шаблоны в кеше plugin
+│    USER_PATTERNS    = ~/.claude/patterns/        ← шаблоны, добавленные пользователем
+│    (сканируются оба источника; пользовательские шаблоны имеют приоритет над встроенными)
+│
+├── Без арг.:  Bash — сканировать USER_PATTERNS + PLUGIN_TEMPLATES → список + подсказка --patch
 │              (только мета-проект) Bash — сканировать pending proposals
 │
-├── <name>:    Читать шаблон
+├── <name>:    Читать шаблон (сначала USER_PATTERNS, затем PLUGIN_TEMPLATES)
 │              Bash — определить информацию о проекте (CLAUDE.md или shell-зонд)
 │              Заполнить плейсхолдеры стартового промпта
 │              Шаг 5a — проверить существование файлов → 3 варианта: перезаписать/пропустить/посмотреть

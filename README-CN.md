@@ -99,12 +99,25 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 ## 安装的文件
 
+**方式 A — plugin 安装**（`/plugin install`）：
+```
+~/.claude/
+└── skills/
+    └── patterns/                # /patterns:patterns skill（自动发现）
+        └── SKILL.md
+# 内置模板保留在 plugin cache，通过 $SKILL_FILE 访问，无需复制
+```
+
+**方式 B/C — 安装脚本 / 手动**：
 ```
 ~/.claude/
 ├── commands/
 │   └── patterns.md              # /patterns 命令
-└── patterns/
-    └── agent-monitoring.md      # 运行时 agent 监控模式
+├── patterns/
+│   └── agent-monitoring.md      # 运行时 agent 监控模式
+└── skills/
+    └── patterns/                # /patterns:patterns skill
+        └── SKILL.md
 ```
 
 ---
@@ -120,12 +133,18 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 ## 架构
 
 ```
-/patterns（协调者）
+/patterns:patterns（skill，协调者）
 │
-├── 无参数：  Bash — 查找 ~/.claude/patterns/*.md → 列出描述 + --patch 提示
+│  路径解析（每次执行）：
+│    PLUGIN_ROOT      = dirname(dirname($SKILL_FILE))
+│    PLUGIN_TEMPLATES = $PLUGIN_ROOT/templates/   ← plugin cache 中的内置模板
+│    USER_PATTERNS    = ~/.claude/patterns/        ← 用户自添加的模板
+│    （同时扫描两处；同名文件以用户模板优先）
+│
+├── 无参数：  Bash — 扫描 USER_PATTERNS + PLUGIN_TEMPLATES → 列出描述 + --patch 提示
 │              （仅元项目）Bash — 扫描 pending proposals
 │
-├── <name>：  读取模式模板
+├── <name>：  读取模式模板（先查 USER_PATTERNS，再查 PLUGIN_TEMPLATES）
 │              Bash — 探测项目信息（CLAUDE.md 或 shell 探针）
 │              填写初始化 prompt 占位符
 │              步骤 5a — 检查文件存在性 → 三选项：覆盖/跳过/查看后决定

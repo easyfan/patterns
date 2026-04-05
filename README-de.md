@@ -91,12 +91,25 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 ## Installierte Dateien
 
+**Option A — Plugin-Installation** (`/plugin install`):
+```
+~/.claude/
+└── skills/
+    └── patterns/                # /patterns:patterns Skill (automatisch erkannt)
+        └── SKILL.md
+# Mitgelieferte Templates verbleiben im Plugin-Cache — Zugriff via $SKILL_FILE, keine Kopie nötig
+```
+
+**Option B/C — Installations-Skript / Manuell**:
 ```
 ~/.claude/
 ├── commands/
 │   └── patterns.md              # /patterns-Slash-Command
-└── patterns/
-    └── agent-monitoring.md      # Laufzeit-Agent-Monitoring-Pattern
+├── patterns/
+│   └── agent-monitoring.md      # Laufzeit-Agent-Monitoring-Pattern
+└── skills/
+    └── patterns/                # /patterns:patterns Skill
+        └── SKILL.md
 ```
 
 ---
@@ -112,12 +125,18 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 ## Architektur
 
 ```
-/patterns (Koordinator)
+/patterns:patterns (Skill, Koordinator)
 │
-├── Kein Arg:  Bash — find ~/.claude/patterns/*.md → Liste mit Beschreibungen + --patch-Hinweis
+│  Pfadauflösung (bei jedem Start):
+│    PLUGIN_ROOT      = dirname(dirname($SKILL_FILE))
+│    PLUGIN_TEMPLATES = $PLUGIN_ROOT/templates/   ← mitgelieferte Templates im Plugin-Cache
+│    USER_PATTERNS    = ~/.claude/patterns/        ← benutzereigene Templates
+│    (beide Quellen scannen; benutzereigene Templates überschreiben gleichnamige Plugin-Templates)
+│
+├── Kein Arg:  Bash — USER_PATTERNS + PLUGIN_TEMPLATES scannen → Liste + --patch-Hinweis
 │              (nur Meta-Projekt) Bash — Pending Proposals scannen
 │
-├── <name>:    Pattern-Vorlage lesen
+├── <name>:    Pattern-Vorlage lesen (zuerst USER_PATTERNS, dann PLUGIN_TEMPLATES)
 │              Bash — Projektinfos erkennen (CLAUDE.md oder Shell-Sonde)
 │              Kickoff-Prompt-Platzhalter befüllen
 │              Schritt 5a — Dateiexistenz prüfen → 3-Weg: überschreiben/überspringen/ansehen

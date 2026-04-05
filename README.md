@@ -99,12 +99,25 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 ## Files installed
 
+**Option A — plugin install** (`/plugin install`):
+```
+~/.claude/
+└── skills/
+    └── patterns/                # /patterns:patterns skill (auto-discovered)
+        └── SKILL.md
+# bundled templates stay in plugin cache — accessed via $SKILL_FILE, no copy needed
+```
+
+**Option B/C — install script / manual**:
 ```
 ~/.claude/
 ├── commands/
 │   └── patterns.md              # /patterns slash command
-└── patterns/
-    └── agent-monitoring.md      # runtime agent monitoring pattern
+├── patterns/
+│   └── agent-monitoring.md      # runtime agent monitoring pattern
+└── skills/
+    └── patterns/                # /patterns:patterns skill
+        └── SKILL.md
 ```
 
 ---
@@ -120,12 +133,18 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 ## Architecture
 
 ```
-/patterns (coordinator)
+/patterns:patterns (skill, coordinator)
 │
-├── No args:   Bash — find ~/.claude/patterns/*.md → list with descriptions + --patch hint
+│  Path resolution (every run):
+│    PLUGIN_ROOT    = dirname(dirname($SKILL_FILE))
+│    PLUGIN_TEMPLATES = $PLUGIN_ROOT/templates/      ← bundled patterns in plugin cache
+│    USER_PATTERNS    = ~/.claude/patterns/           ← user-added patterns
+│    (scan both; user patterns override bundled ones with same name)
+│
+├── No args:   Bash — scan USER_PATTERNS + PLUGIN_TEMPLATES → list with descriptions + --patch hint
 │              (meta-project only) Bash — scan pending proposals
 │
-├── <name>:    Read pattern template
+├── <name>:    Read pattern template (USER_PATTERNS first, then PLUGIN_TEMPLATES)
 │              Bash — detect project info (CLAUDE.md or shell probe)
 │              Fill kickoff prompt placeholders
 │              Step 5a — check file existence → 3-way: overwrite/skip/view-then-decide

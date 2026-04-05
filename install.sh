@@ -47,8 +47,11 @@ run()   { $DRY_RUN || "$@"; }
 # ── Files to install: "src_rel|dst_rel" pairs (bash 3.2 compatible)
 FILES=(
   "commands/patterns.md|commands/patterns.md"
-  "patterns/agent-monitoring.md|patterns/agent-monitoring.md"
+  "templates/agent-monitoring.md|patterns/agent-monitoring.md"
 )
+
+SKILL_SRC="skills/patterns"
+SKILL_DST="skills/patterns"
 
 # ── Header ────────────────────────────────────────────────────────────────────
 echo ""
@@ -76,6 +79,13 @@ if $UNINSTALL; then
       skip "$(basename "$dst") (not found)"
     fi
   done
+  skill_dst="$CLAUDE_DIR/$SKILL_DST"
+  if [ -d "$skill_dst" ]; then
+    run rm -rf "$skill_dst"
+    ok "Removed $skill_dst"
+  else
+    skip "$SKILL_DST (not found)"
+  fi
   echo ""
   echo "  Uninstall complete."
   echo ""
@@ -103,6 +113,23 @@ for pair in "${FILES[@]}"; do
     changed=$((changed + 1))
   fi
 done
+
+# ── Skill ────────────────────────────────────────────────────────────────────
+skill_src="$SCRIPT_DIR/$SKILL_SRC"
+skill_dst="$CLAUDE_DIR/$SKILL_DST"
+if [ -f "$skill_dst/SKILL.md" ] && diff -q "$skill_src/SKILL.md" "$skill_dst/SKILL.md" &>/dev/null; then
+  skip "$SKILL_DST"
+else
+  [ -d "$skill_dst" ] && info "Updating  $SKILL_SRC..." || info "Installing $SKILL_SRC..."
+  run mkdir -p "$skill_dst"
+  run cp -r "$skill_src/." "$skill_dst/"
+  ok "$SKILL_DST → $skill_dst"
+  changed=$((changed + 1))
+fi
+
+# ── Uninstall skill (if $UNINSTALL block re-entered) ─────────────────────────
+# Note: uninstall for skill is handled in the UNINSTALL block above via FILES loop;
+# skill_dst removal is done separately if needed — currently skill uninstall is manual.
 
 # ── Footer ────────────────────────────────────────────────────────────────────
 echo ""

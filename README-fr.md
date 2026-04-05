@@ -91,12 +91,25 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 ## Fichiers installés
 
+**Option A — Installation via plugin** (`/plugin install`) :
+```
+~/.claude/
+└── skills/
+    └── patterns/                # skill /patterns:patterns (découverte automatique)
+        └── SKILL.md
+# Les templates intégrés restent dans le cache du plugin — accès via $SKILL_FILE, aucune copie nécessaire
+```
+
+**Option B/C — Script d'installation / Manuel** :
 ```
 ~/.claude/
 ├── commands/
 │   └── patterns.md              # slash command /patterns
-└── patterns/
-    └── agent-monitoring.md      # pattern de monitoring d'agent en temps réel
+├── patterns/
+│   └── agent-monitoring.md      # pattern de monitoring d'agent en temps réel
+└── skills/
+    └── patterns/                # skill /patterns:patterns
+        └── SKILL.md
 ```
 
 ---
@@ -112,12 +125,18 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 ## Architecture
 
 ```
-/patterns (coordinateur)
+/patterns:patterns (skill, coordinateur)
 │
-├── Sans arg :  Bash — find ~/.claude/patterns/*.md → liste avec descriptions + indice --patch
+│  Résolution de chemin (à chaque exécution) :
+│    PLUGIN_ROOT      = dirname(dirname($SKILL_FILE))
+│    PLUGIN_TEMPLATES = $PLUGIN_ROOT/templates/   ← templates intégrés dans le cache plugin
+│    USER_PATTERNS    = ~/.claude/patterns/        ← templates ajoutés par l'utilisateur
+│    (les deux sources sont scannées ; les templates utilisateur ont priorité sur les templates intégrés)
+│
+├── Sans arg :  Bash — scanner USER_PATTERNS + PLUGIN_TEMPLATES → liste + indice --patch
 │               (méta-projet uniquement) Bash — scanner les proposals en attente
 │
-├── <name> :    Lire le template du pattern
+├── <name> :    Lire le template (USER_PATTERNS en priorité, puis PLUGIN_TEMPLATES)
 │               Bash — détecter les infos du projet (CLAUDE.md ou sondage shell)
 │               Remplir les espaces réservés du prompt de démarrage
 │               Étape 5a — vérifier l'existence des fichiers → 3 choix : écraser/ignorer/voir
