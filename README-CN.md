@@ -1,3 +1,5 @@
+[English](README.md) | [中文](README-CN.md) | [Deutsch](README-de.md) | [Français](README-fr.md) | [Русский](README-ru.md)
+
 # patterns
 
 Claude Code 工作流模式管理器——列出、实例化并补丁修复项目中的工作流模式。
@@ -159,15 +161,15 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 `evals/evals.json` 包含 7 个测试用例，覆盖列表、实例化、`--patch` 三种模式的主要分支：
 
-| ID | 场景 | 验证重点 |
-|----|------|---------|
-| 1 | `/patterns`（无参数列表）| 输出所有可用 pattern 名称和描述，底部含 `--patch` 提示 |
-| 2 | `/patterns agent-monitoring`（实例化）| 读取模板，自动探测项目信息，生成 `.claude/` 文件 |
-| 3 | `/patterns nonexistent-xyz`（目标不存在）| 输出"未找到"错误，列出可用 pattern 名称 |
-| 4 | `/patterns --patch research-module`（单命令补丁）| 检测缺失 hook 步骤，预览补丁计划，等待确认后追加 |
-| 5 | 元项目上下文（`.claude/user-level-write` 存在）| 列表模式额外展示 pending proposals |
-| 6 | 仅基础设施项目（无 skill-review 安装）| 实例化流程中跳过 `/skill-review` 质量门，不报错 |
-| 7 | 目标文件已存在冲突 | 触发三选项（覆盖/跳过/查看后决定），不静默覆盖 |
+| ID | 提示词 | 验证重点 |
+|----|--------|---------|
+| 1 | `/patterns` | 列出所有可用 pattern 名称和修改时间，底部含 `--patch` 提示 |
+| 2 | `/patterns` | 输出用法提示（`/patterns <name>` 或 `--patch`），列表模式不触发 `/skill-review` 询问 |
+| 3 | `/patterns nonexistent_pattern_xyz_12345` | 输出"未找到"提示并列出可用 pattern，不崩溃，无 traceback |
+| 4 | `/patterns --patch` | 扫描含 `generated-from` 字段的已实例化命令，输出扫描结果或"未找到"提示 |
+| 5 | `/patterns --patch research-module` | 输出指定命令的扫描结果：找到列表或"无可修补命令"提示 |
+| 6 | `/patterns` | 列出 pattern 时末尾含 `--patch` 用法提示 |
+| 7 | `/patterns --patch nonexistent_cmd_xyz_99999` | 指定不存在命令名时，输出"未找到"或空扫描结果，不崩溃 |
 
 手动测试（在 Claude Code 会话中）：
 ```bash

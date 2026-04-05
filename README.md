@@ -1,3 +1,5 @@
+[English](README.md) | [中文](README-CN.md) | [Deutsch](README-de.md) | [Français](README-fr.md) | [Русский](README-ru.md)
+
 # patterns
 
 Workflow pattern manager for Claude Code — lists, instantiates, and patches workflow patterns in your project.
