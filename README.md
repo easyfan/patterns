@@ -176,6 +176,10 @@ The full loop from pattern instantiation to reviewed, production-ready command t
 
 ## Development
 
+### Authoring patterns
+
+Pattern templates follow a contract parsed by the `/patterns` engine — required sections, a kickoff block, `[...]` instantiation-time vs `{...}` runtime placeholders, and the `generated-from` / `patch-anchor` fields. To author (or generate) a new template, see **[TEMPLATE_SPEC.md](TEMPLATE_SPEC.md)** for the full contract and a minimal skeleton.
+
 ### Evals
 
 `evals/evals.json` contains 7 test cases covering the list, instantiate, and `--patch` modes:

@@ -176,6 +176,10 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 
 ## 开发
 
+### 编写 Pattern 模板
+
+模板需遵循 `/patterns` 引擎解析的契约——必需章节、Kickoff 代码块、`[...]`（实例化期）与 `{...}`（运行期）占位符，以及 `generated-from` / `patch-anchor` 字段。编写或生成新模板前，请参阅 **[TEMPLATE_SPEC.md](TEMPLATE_SPEC.md)**，内含完整契约与最小骨架示例。
+
 ### Evals
 
 `evals/evals.json` 包含 7 个测试用例，覆盖列表、实例化、`--patch` 三种模式的主要分支：

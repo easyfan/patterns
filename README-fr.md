@@ -168,6 +168,10 @@ De l'instanciation du pattern à la command prête pour la production, le tout e
 
 ## Développement
 
+### Création de patterns
+
+Les modèles de pattern suivent un contrat analysé par le moteur `/patterns` — sections requises, bloc kickoff, espaces réservés `[...]` (instanciation) vs `{...}` (exécution), et les champs `generated-from` / `patch-anchor`. Pour créer (ou générer) un nouveau modèle, consultez **[TEMPLATE_SPEC.md](TEMPLATE_SPEC.md)** pour le contrat complet et un squelette minimal.
+
 ### Evals
 
 `evals/evals.json` contient 7 cas de test couvrant les modes liste, instanciation et `--patch` :

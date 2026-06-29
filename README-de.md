@@ -168,6 +168,10 @@ Vom Pattern bis zum geprüften, produktionsreifen Command vergingen weniger als 
 
 ## Entwicklung
 
+### Patterns erstellen
+
+Pattern-Vorlagen folgen einem Vertrag, den die `/patterns`-Engine parst — erforderliche Abschnitte, ein Kickoff-Block, `[...]`-Platzhalter (Instanziierungszeit) vs. `{...}` (Laufzeit) sowie die Felder `generated-from` / `patch-anchor`. Zum Erstellen (oder Generieren) einer neuen Vorlage siehe **[TEMPLATE_SPEC.md](TEMPLATE_SPEC.md)** für den vollständigen Vertrag und ein minimales Grundgerüst.
+
 ### Evals
 
 `evals/evals.json` enthält 7 Testfälle für List-, Instanziierungs- und `--patch`-Modus:
