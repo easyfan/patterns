@@ -31,7 +31,7 @@ Workflow pattern manager for Claude Code — lists, instantiates, and patches wo
 /plugin install patterns@patterns
 ```
 
-> ⚠️ **Not verified by automated tests**: `/plugin` is a Claude Code REPL built-in and cannot be invoked via `claude -p`. Run manually in a Claude Code session; not covered by skill-test pipeline (looper Stage 5).
+> ⚠️ **Partially covered by automated tests**: The underlying `claude plugin install` CLI path is verified by looper T2b (Plan B). The `/plugin` REPL entry point (interactive UI) cannot be tested via `claude -p` and must be verified manually in a Claude Code session.
 
 <!--
 #### npx (not yet published)
