@@ -95,6 +95,8 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 /patterns --patch                      # 修复所有已知命令
 ```
 
+> 内置的 `agent-monitoring` 模板已声明 `patch-anchor`，因此 `--patch` 能把它的监控收尾钩子回填进早于该钩子实例化、缺这一步的命令。
+
 ---
 
 ## 安装的文件

@@ -95,6 +95,8 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 /patterns --patch                      # patch all known commands
 ```
 
+> The bundled `agent-monitoring` template declares a `patch-anchor`, so `--patch` can retrofit its monitoring hook into commands that were instantiated before the hook existed.
+
 ---
 
 ## Files installed

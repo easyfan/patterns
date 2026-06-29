@@ -87,6 +87,8 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 /patterns --patch                      # alle bekannten Commands patchen
 ```
 
+> Die mitgelieferte Vorlage `agent-monitoring` deklariert einen `patch-anchor`, sodass `--patch` ihren Monitoring-Hook in Befehle nachrüsten kann, die vor dessen Existenz instanziiert wurden.
+
 ---
 
 ## Installierte Dateien

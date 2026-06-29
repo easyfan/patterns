@@ -87,6 +87,8 @@ cp patterns/agent-monitoring.md ~/.claude/patterns/
 /patterns --patch                      # corriger toutes les commands connues
 ```
 
+> Le modèle fourni `agent-monitoring` déclare un `patch-anchor`, ce qui permet à `--patch` d'ajouter son hook de surveillance aux commandes instanciées avant l'existence de ce hook.
+
 ---
 
 ## Fichiers installés

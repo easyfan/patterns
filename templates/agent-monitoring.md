@@ -4,6 +4,7 @@ description: >
   运行时 agent 行为监控模式。在高风险 agent 任务完成后，
   协调者调用 agent-monitor 审查完整 tool call trace，
   将分级告警（✅/⚠️/🚨/🛑）写入 memory/agent-alerts.md。
+patch-anchor: "## 监控钩子：任务完成后调用 agent-monitor"
 ---
 
 # Agent 监控模式（agent-monitoring）
@@ -50,6 +51,22 @@ current_project: {CURRENT_PROJECT}
 `{platform_root}/projects/{current_project}/memory/agent-alerts.md`
 
 这提供完整审计轨迹，可在出现异常后回溯历史行为。
+
+## 监控钩子：任务完成后调用 agent-monitor
+
+> 本节是 `/patterns --patch` 的回填锚点（patch-anchor）。实例化出的协调者命令若缺此收尾步骤，`--patch` 会将本节内容追加到命令末尾。本节须自包含，可独立追加。
+
+在本命令执行的**高风险 agent 任务**（写非 scratch/memory 文件、发起网络请求、写入越权路径）完成后，协调者**必须立即**启动 agent-monitor 审查其完整 tool call trace：
+
+```
+agent_name: {刚完成的 agent 名称}
+task_desc: {该任务一句话目标}
+trace_path: {该 agent 的 scratch 文件路径}
+platform_root: {PLATFORM_ROOT}
+current_project: {CURRENT_PROJECT}
+```
+
+按返回告警等级响应：✅ CLEAN 继续 / ⚠️ WATCH 记录 / 🚨 ALERT 暂停后续并通知用户 / 🛑 BLOCK 立即停止并 `git checkout` 回滚。所有结论（含 CLEAN）写入 `{platform_root}/projects/{current_project}/memory/agent-alerts.md`。
 
 ## 与现有工具链的关系
 
